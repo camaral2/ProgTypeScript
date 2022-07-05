@@ -1,0 +1,76 @@
+# Online Editor version - https://editor.swagger.io/
+#----------
+openapi: 3.0.3
+info:
+  title: Backend API
+  description: Backend API for a new Job 
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: cristian_amaral@hotmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: /api/v1
+ 
+tags:
+  - name: progTypeScript
+    description: progTypeScript APIs
+ 
+paths:
+  /test:
+    get:
+      description: Return 'Hi <name> - I'm Fine !!!'
+      tags: 
+        - progTypeScript
+      operationId: test
+      parameters:
+      - name: name
+        required: false
+        in: query
+        description: A name of test result
+        schema:
+          type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+ 
+  /logout:
+    get:
+      description: 'Finalized your session \<name\>'
+      tags:
+        - progTypeScript
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Success in this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    DefaultResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
