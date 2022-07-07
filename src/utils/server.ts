@@ -1,26 +1,45 @@
 import express from 'express'
-import { Express} from 'express-serve-static-core'
+import { Express } from 'express-serve-static-core'
 import * as OpenApiValidator from 'express-openapi-validator'
-import {connector, summarise} from 'swagger-routes-express'
+import { connector, summarise } from 'swagger-routes-express'
 import YAML from 'yamljs'
-import * as api from '../api/controllers'
-
+import * as api from '@exmpl/api/controllers'
+import bodyParser from 'body-parser'
+import morgan from 'morgan'
+import morganBody from 'morgan-body'
 import swaggerUi from 'swagger-ui-express'
+import { expressDevLogger } from '@exmpl/utils/express_dev_logger'
+import config from '@exmpl/config'
+import logger from '@exmpl/utils/logger'
 
-export async function createServer():Promise<Express> {
+export async function createServer(): Promise<Express> {
     const server = express()
 
     const yamlFile = './config/openapi.yml'
     const apiDefYaml = YAML.load(yamlFile)
     const apiSum = summarise(apiDefYaml)
-    
-    console.info(apiSum)
+
+    logger.info(apiSum)
 
     const valOption = {
         coerceTypes: true,
         apiSpec: yamlFile,
         validateRequests: true,
         validateResponses: true
+    }
+
+    server.use(bodyParser.json())
+
+    if (config.morganLogger) {
+        server.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
+    }
+
+    if (config.morganBodyLogger) {
+        morganBody(server)
+    }
+
+    if (config.exmplDevLogger) {
+        server.use(expressDevLogger)
     }
 
     server.use(OpenApiValidator.middleware(valOption))
@@ -44,13 +63,13 @@ export async function createServer():Promise<Express> {
     const options = { explorer: true }
 
     server.use('/api-docs', swaggerUi.serve)
-    server.get('/api-docs', swaggerUi.setup(apiDefYaml, 
+    server.get('/api-docs', swaggerUi.setup(apiDefYaml,
         options))
 
-    const con = connector(api, apiDefYaml,{
-        onCreateRoute: (method: string, descriptor: any[])=>{
+    const con = connector(api, apiDefYaml, {
+        onCreateRoute: (method: string, descriptor: any[]) => {
             descriptor.shift()
-            console.log(`${method} - ${descriptor.map((d: any) => d.name).join(', ')}`)
+            logger.verbose(`${method} - ${descriptor.map((d: any) => d.name).join(', ')}`)
         },
         security: {
             bearerAuth: api.auth
@@ -62,6 +81,6 @@ export async function createServer():Promise<Express> {
     server.get('/', (req, res) => {
         res.send('Cristian: My application backend !!!')
     })
-    
+
     return server
 }
