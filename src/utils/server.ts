@@ -12,6 +12,7 @@ import { expressDevLogger } from '@exmpl/utils/express_dev_logger'
 import config from '@exmpl/config'
 import logger from '@exmpl/utils/logger'
 
+
 export async function createServer(): Promise<Express> {
     const server = express()
 
@@ -22,7 +23,7 @@ export async function createServer(): Promise<Express> {
     logger.info(apiSum)
 
     const valOption = {
-        coerceTypes: true,
+        coerceTypes: config.coerceTypes,
         apiSpec: yamlFile,
         validateRequests: true,
         validateResponses: true
@@ -30,14 +31,17 @@ export async function createServer(): Promise<Express> {
 
     server.use(bodyParser.json())
 
+    /* istanbul ignore next */
     if (config.morganLogger) {
         server.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
     }
 
+    /* istanbul ignore next */
     if (config.morganBodyLogger) {
         morganBody(server)
     }
 
+    /* istanbul ignore next */
     if (config.exmplDevLogger) {
         server.use(expressDevLogger)
     }
@@ -77,10 +81,6 @@ export async function createServer(): Promise<Express> {
     })
 
     con(server)
-
-    server.get('/', (req, res) => {
-        res.send('Cristian: My application backend !!!')
-    })
 
     return server
 }

@@ -1,5 +1,6 @@
-import winston from 'winston'
+/* istanbul ignore file */
 
+import winston from 'winston'
 import config from '@exmpl/config'
 
 // npm debug levels (winston default):

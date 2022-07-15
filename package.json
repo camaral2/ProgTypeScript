@@ -8,7 +8,8 @@
   "scripts": {
     "build": "tsc",
     "start": "ENV_FILE=./config/.env.prod node -r tsconfig-paths/register ./bin/app.js",
-    "dev": "ENV_FILE=./config/.env.dev ts-node -r tsconfig-paths/register ./src/app.ts"
+    "dev": "ENV_FILE=./config/.env.dev ts-node -r tsconfig-paths/register ./src/app.ts",
+    "test:unit": "ENV_FILE=./config/.env.test jest"
   },
   "dependencies": {
     "@types/dotenv-parse-variables": "^2.0.1",
@@ -34,6 +35,12 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/jest": "^28.1.4",
+    "@types/supertest": "^2.0.12",
+    "jest": "^28.1.2",
+    "jest-openapi": "^0.14.2",
+    "supertest": "^6.2.4",
+    "ts-jest": "^28.0.5",
     "ts-node": "^10.8.2"
   }
 }
