@@ -9,3 +9,10 @@ https://jestjs.io/docs/en/getting-started
 Test:
 https://rsbh.dev/blog/rest-api-express-typescript-jest-testing
 https://dev.to/jameswallis/how-to-use-the-open-api-and-swagger-validator-plugin-for-chai-and-jest-to-keep-your-api-documentation-up-to-date-26om
+
+
+
+https://losikov.medium.com/part-5-mongodb-with-mongoose-d01144739002
+
+
+Unit Tests
