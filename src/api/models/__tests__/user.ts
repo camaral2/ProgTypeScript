@@ -91,3 +91,52 @@ describe('Save of register', () => {
         expect(userDataFirt.password).not.toBe(userDataSecond.password)
     })
 })
+
+describe('Compare Password', () =>{
+    it('Should return true for valid password', async ()=>{
+        const password = faker.internet.password();
+        const user = new User({email: faker.internet.email(), password: password, name: faker.name.findName()})
+
+        await user.save()
+
+        expect(await user.comparePassword(password)).toBe(true)
+    })
+
+    it('Should return false for invalid password', async ()=>{
+        const password = faker.internet.password();
+        const outherPassword = faker.internet.password();
+        const user = new User({email: faker.internet.email(), password: password, name: faker.name.findName()})
+
+        await user.save()
+
+        expect(await user.comparePassword(outherPassword)).toBe(false)
+    })
+
+    it('Should return false for invalid password', async ()=>{
+        const password = faker.internet.password();
+        const newPassword = faker.internet.password();
+        const user = new User({email: faker.internet.email(), password: password, name: faker.name.findName()})
+
+        await user.save()
+        expect(await user.comparePassword(password)).toBe(true)
+
+        user.password = newPassword
+        const userUpdated = await user.save()
+
+        expect(await userUpdated.comparePassword(newPassword)).toBe(true)
+        expect(await userUpdated.comparePassword(password)).toBe(false)
+    })
+})
+
+describe('toJSON', ()=>{
+    it('Should return valid toJSON', async ()=>{
+        const email = faker.internet.email()
+        const password = faker.internet.password()
+        const name = faker.name.findName()
+
+        const user = new User({ email: email, password: password, name: name })
+        await user.save()      
+        
+        expect(user.toJSON()).toEqual({email: email, name: name, created: expect.any(Number)})
+    })
+})
