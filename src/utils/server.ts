@@ -47,6 +47,10 @@ export async function createServer(): Promise<Express> {
     }
 
     server.use(OpenApiValidator.middleware(valOption))
+    //await new OpenApiValidator(valOption).install(server)
+
+
+    
 
     //Validator custom
     server.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
