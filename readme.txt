@@ -12,7 +12,7 @@ https://dev.to/jameswallis/how-to-use-the-open-api-and-swagger-validator-plugin-
 
 
 
-https://losikov.medium.com/part-5-mongodb-with-mongoose-d01144739002
+https://losikov.medium.com/part-6-authentication-with-jwt-json-web-token-ec78459b9c88
 
 https://editor.swagger.io
 

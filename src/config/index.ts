@@ -27,6 +27,9 @@ interface Config {
   exmplDevLogger: boolean
   loggerLevel: LogLevel 
   coerceTypes: boolean
+  privateKeyFile: string
+  privateKeyPassPhrase: string
+  publicKeyFile: string
 }
 
 const config: Config = {
@@ -39,7 +42,10 @@ const config: Config = {
   morganBodyLogger: parsedEnv.MORGAN_BODY_LOGGER as boolean,
   exmplDevLogger: parsedEnv.EXMPL_DEV_LOGGER as boolean,
   loggerLevel: parsedEnv.LOGGER_LEVEL as LogLevel,
-  coerceTypes: parsedEnv.COERCE_TYPES as boolean
+  coerceTypes: parsedEnv.COERCE_TYPES as boolean,
+  privateKeyFile: parsedEnv.PRIVATE_KEY_FILE as string,
+  privateKeyPassPhrase: parsedEnv.PRIVATE_KEY_PASSPHRASE as string,
+  publicKeyFile: parsedEnv.PUBLIC_KEY_FILE as string
 }
 
 export default config
