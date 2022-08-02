@@ -103,7 +103,3 @@ bin
 
 # TernJS port file
 .tern-port
-
-# Keys Token
-public.pem
-private.pem

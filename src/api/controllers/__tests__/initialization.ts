@@ -2,11 +2,18 @@ import request from 'supertest'
 import { Express } from 'express-serve-static-core'
 
 import { createServer } from '@exmpl/utils/server'
+import database from '@exmpl/utils/database'
+import { createDummyAndAuthorize } from '@exmpl/tests/user'
 
 let server: Express
 
 beforeAll(async () => {
+    await database.open()
     server = await createServer()
+})
+
+afterAll(async () => {
+    await database.close()
 })
 
 describe('GET /test', () => {
@@ -38,27 +45,34 @@ describe('GET /test', () => {
             .expect('Content-Type', /json/)
             .expect(400)
             .then(res => {
-                expect(res.body).toMatchObject({'error': {
-                    type: 'request_validation', 
-                    message: expect.stringMatching(/Empty.*\parameter.*\'name\'/), 
-                    errors: expect.anything()
-                  }})
+                expect(res.body).toMatchObject({
+                    'error': {
+                        type: 'request_validation',
+                        message: expect.stringMatching(/Empty.*\parameter.*\'name\'/),
+                        errors: expect.anything()
+                    }
+                })
                 done();
             });
     });
 });
 
-describe('Get /logout', ()=>{
+describe('Get /logout', () => {
     it("Should return 200 & valid response to authorization with fakeToken request", done => {
-        request(server)
-            .get('/api/v1/logout')
-            .set('Authorization', 'Bearer testApp')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .then(res => {
-                expect(res.body).toMatchObject({'message': 'Finalized your session userIdTest'})
-                done();
+
+        createDummyAndAuthorize()
+            .then(userLogin => {
+                request(server)
+                    .get('/api/v1/logout')
+                    .set('Authorization', `Bearer ${userLogin.token}`)
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .then(res => {
+                        expect(res.body).toMatchObject({ 'message': `Finalized your session ${userLogin.userId}`})
+                        done();
+                    });
             });
+
     });
 
     it("Should return 401 & valid error to invalid authorization", done => {
@@ -68,7 +82,7 @@ describe('Get /logout', ()=>{
             .expect('Content-Type', /json/)
             .expect(401)
             .then(res => {
-                expect(res.body).toMatchObject({error: {type: 'unauthorized', message: 'Authentication o API Failed'}})
+                expect(res.body).toMatchObject({ error: { type: 'unauthorized', message: 'Authentication o API Failed' } })
                 done();
             });
     });
@@ -79,11 +93,13 @@ describe('Get /logout', ()=>{
             .expect('Content-Type', /json/)
             .expect(401)
             .then(res => {
-                expect(res.body).toMatchObject({'error': {
-                    type: 'request_validation', 
-                    message: 'Authorization header required', 
-                    errors: expect.anything()
-                  }})
+                expect(res.body).toMatchObject({
+                    'error': {
+                        type: 'request_validation',
+                        message: 'Authorization header required',
+                        errors: expect.anything()
+                    }
+                })
                 done();
             });
     });

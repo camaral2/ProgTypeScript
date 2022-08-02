@@ -3,51 +3,78 @@ import { faker } from '@faker-js/faker';
 import user from '@exmpl/api/services/user'
 import database from '@exmpl/utils/database'
 
-beforeAll(async ()=> {
-    await database.open()
+import { createDummy, createDummyAndAuthorize } from '@exmpl/tests/user'
+
+beforeAll(async () => {
+  await database.open()
 })
 
-afterAll(async ()=>{
-    await database.close()
+afterAll(async () => {
+  await database.close()
 })
 
 
 describe('auth', () => {
-    it('should resolve with true and valid userId for hardcode token', async () => {
-        const res = await user.auth('testApp')
-        expect(res).toEqual({ userId: 'userIdTest' })
-    })
+  it('should resolve with true and valid userId for hardcode token', async () => {
+    const dummy = await createDummyAndAuthorize()
+    await expect(user.auth(dummy.token)).resolves.toEqual({ userId: dummy.userId })
+  })
 
-    it('shuld resolve with false for invalid token', async () => {
-        const res = await user.auth('OutherTest')
-        expect(res).toEqual({ error: { type: 'unauthorized', message: 'Authentication o API Failed' } })
-    })
+  it('shuld resolve with false for invalid token', async () => {
+    const res = await user.auth('OutherTest')
+    expect(res).toEqual({ error: { type: 'unauthorized', message: 'Authentication o API Failed' } })
+  })
 })
 
-describe('createUser', ()=>{
-  it('Should resolve with true and valid userId', async ()=>{
+describe('createUser', () => {
+  it('Should resolve with true and valid userId', async () => {
     const email = faker.internet.email()
     const password = faker.internet.password()
     const name = faker.name.findName()
 
-    await expect(user.createUser(email, password, name)).resolves.toEqual({userId: expect.stringMatching(/^[a-f0-9]{24}$/)})
-  })  
+    await expect(user.createUser(email, password, name)).resolves.toEqual({ userId: expect.stringMatching(/^[a-f0-9]{24}$/) })
+  })
 
-  it('Should resolves with false e valid error if duplicate userId', async ()=>{
+  it('Should resolves with false e valid error if duplicate userId', async () => {
     const email = faker.internet.email()
     const password = faker.internet.password()
     const name = faker.name.findName()
 
     await user.createUser(email, password, name)
 
-    await expect(user.createUser(email, password, name)).resolves.toEqual({error: {type: 'account_already_exists', message: `${email} already exists`}})
+    await expect(user.createUser(email, password, name)).resolves.toEqual({ error: { type: 'account_already_exists', message: `${email} already exists` } })
   })
 
-  it('Should rejects if invalid email input', async ()=>{
+  it('Should rejects if invalid email input', async () => {
     const email = 'dfasd@sf'
     const password = faker.internet.password()
     const name = faker.name.findName()
 
     await expect(user.createUser(email, password, name)).rejects.toThrowError('validation failed: email')
   })
+})
+
+describe('login', () => {
+  it('should return JWT token, userId, expireAt to a valid login/password', async () => {
+    const dummy = await createDummy()
+    await expect(user.login(dummy.email, dummy.password)).resolves.toEqual({
+      userId: dummy.userId,
+      token: expect.stringMatching(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/),
+      expireAt: expect.any(Date)
+    })
+  })
+
+  it('should reject with error if login does not exist', async () => {
+    await expect(user.login(faker.internet.email(), faker.internet.password())).resolves.toEqual({
+      error: { type: 'invalid_credentials', message: 'Invalid Login/Password' }
+    })
+  })
+
+  it('should reject with error if password is wrong', async () => {
+    const dummy = await createDummy()
+    await expect(user.login(dummy.email, faker.internet.password())).resolves.toEqual({
+      error: { type: 'invalid_credentials', message: 'Invalid Login/Password' }
+    })
+  })
+
 })
