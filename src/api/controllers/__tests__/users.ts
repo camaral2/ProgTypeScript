@@ -6,6 +6,9 @@ import { Express } from 'express-serve-static-core'
 import database from '@exmpl/utils/database'
 import { createServer } from '@exmpl/utils/server'
 
+import { createDummy } from '@exmpl/tests/user'
+import exp from 'constants';
+
 let server: Express
 
 beforeAll(async () => {
@@ -77,5 +80,51 @@ describe('POST /api/v1/user', () => {
                     })
                 done();
             })
+    })
+})
+
+describe('POST /api/v1/login', () => {
+    it('Should return 200 e valid response from a valid login request', done => {
+        createDummy()
+            .then(userLogin => {
+                request(server)
+                    .post(`/api/v1/login`)
+                    .send({ email: userLogin.email, password: userLogin.password })
+                    .expect(200)
+                    .then(res => {
+                        expect(res.header['x-expires-after']).toMatch(/^(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))$/)
+                        expect(res.body).toEqual({
+                            userId: expect.stringMatching(/^[a-f0-9]{24}$/),
+                            token: expect.stringMatching(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)
+                        })
+                        done();
+                    })
+            })
+    })
+
+    it('Should return 404 e valid response for a non-exists user', done =>{
+        request(server)
+            .post(`/api/v1/login`)
+            .send({email: faker.internet.email(), password: faker.internet.password()})
+            .expect(404)
+            .then(res =>{
+                expect(res.body).toEqual({
+                    error: {type: 'invalid_credentials', message:'Invalid Login/Password'}
+                })
+                done();
+            })
+    })
+
+    it('Should return 400 e valid response for invalid request', done =>{
+        request(server)
+        .post(`/api/v1/login`)
+        .send({email: 'hhhhh', password: faker.internet.password()})
+        .expect(400)
+        .then(res =>{
+            expect(res.body).toMatchObject({
+                error: {type: 'request_validation', message: expect.stringMatching(/should match format \"email\"/)}
+            })
+            done();
+        })
     })
 })

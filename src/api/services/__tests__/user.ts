@@ -55,7 +55,7 @@ describe('createUser', () => {
 })
 
 describe('login', () => {
-  it('should return JWT token, userId, expireAt to a valid login/password', async () => {
+  it('Should return JWT token, userId, expireAt to a valid login/password', async () => {
     const dummy = await createDummy()
     await expect(user.login(dummy.email, dummy.password)).resolves.toEqual({
       userId: dummy.userId,
@@ -64,17 +64,31 @@ describe('login', () => {
     })
   })
 
-  it('should reject with error if login does not exist', async () => {
+  it('Should reject with error if login does not exist', async () => {
     await expect(user.login(faker.internet.email(), faker.internet.password())).resolves.toEqual({
       error: { type: 'invalid_credentials', message: 'Invalid Login/Password' }
     })
   })
 
-  it('should reject with error if password is wrong', async () => {
+  it('Should reject with error if password is wrong', async () => {
     const dummy = await createDummy()
     await expect(user.login(dummy.email, faker.internet.password())).resolves.toEqual({
       error: { type: 'invalid_credentials', message: 'Invalid Login/Password' }
     })
   })
 
+  it('Should auth performance test', async () => {
+    const dummy = await createDummyAndAuthorize()
+
+    const now = new Date().getTime()
+    let i = 0
+    do {
+      i += 1
+      await user.auth(`Bearer ${dummy.token!}`)
+    } while (new Date().getTime() - now < 1000)
+
+    console.log(`auth performance test: ${i}`)
+  })
+
 })
+

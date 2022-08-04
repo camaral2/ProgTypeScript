@@ -1,9 +1,9 @@
+--- #----------
 # Online Editor version - https://editor.swagger.io/
-#----------
 openapi: 3.0.3
 info:
   title: Backend API
-  description: Backend API for a new Job 
+  description: Backend API for a new Job
   termsOfService: http://swagger.io/terms/
   contact:
     email: cristian_amaral@hotmail.com
@@ -15,36 +15,35 @@ externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
 servers:
-- url: /api/v1
- 
+  - url: /api/v1
+
 tags:
   - name: progTypeScript
     description: progTypeScript APIs
   - name: user
     description: User API
- 
+
 paths:
   /test:
     get:
       description: Return 'Hi <name> - I'm Fine !!!'
-      tags: 
+      tags:
         - progTypeScript
       operationId: test
       parameters:
-      - name: name
-        required: false
-        in: query
-        description: A name of test result
-        schema:
-          type: string
+        - name: name
+          required: false
+          in: query
+          description: A name of test result
+          schema:
+            type: string
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DefaultResponse'
- 
+                $ref: "#/components/schemas/DefaultResponse"
   /logout:
     get:
       description: 'Finalized your session \<name\>'
@@ -59,11 +58,70 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DefaultResponse'
+                $ref: "#/components/schemas/DefaultResponse"
+
+  /login:
+    post:
+      summary: Login
+      tags:
+        - user
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        200:
+          description: Success
+          headers:
+            X-Expires-After:
+              description: date in UTC when token expires
+              required: true
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - userId
+                properties:
+                  userId:
+                    type: string
+                  token:
+                    type: string
+                    format: '^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$'
+        404:
+          description: Invalid Login/Password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailResponse'
+
   /user:
     post:
       summary: Create User
-      tags: 
+      tags:
         - user
       operationId: createUser
       requestBody:
@@ -103,19 +161,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FailResponse'
+                $ref: "#/components/schemas/FailResponse"
         500:
           description: Internal Server Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FailResponse'
+                $ref: "#/components/schemas/FailResponse"
 
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+      bearerFormat: JWT
   schemas:
     DefaultResponse:
       type: object

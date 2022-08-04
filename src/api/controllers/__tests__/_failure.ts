@@ -44,3 +44,19 @@ describe('createUser failure', () => {
     })
 })
 
+describe('login failure', ()=>{
+    it('Should return 500 e valid response if auth rejects with an error', done=>{
+        (UserService.login as jest.Mock).mockResolvedValue({error: {type: 'unkonwn'}})
+        request(server)
+            .post(`/api/v1/login`)
+            .send({
+                email: faker.internet.email(),
+                password: faker.internet.password()
+            })
+            .expect(500)
+            .then(res =>{
+                expect(res.body).toMatchObject({error: {type: 'internal_server_error', message: 'Internal Server Error'}})
+                done()
+            })
+    })
+})

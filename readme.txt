@@ -12,7 +12,7 @@ https://dev.to/jameswallis/how-to-use-the-open-api-and-swagger-validator-plugin-
 
 
 
-https://losikov.medium.com/part-6-authentication-with-jwt-json-web-token-ec78459b9c88
+https://losikov.medium.com/part-7-internal-caching-in-node-js-3f18411bcf2
 
 https://editor.swagger.io
 
