@@ -1,5 +1,6 @@
 import dotenvExtended from 'dotenv-extended'
 import dotenvParseVariables from 'dotenv-parse-variables'
+import { parse } from 'path'
  
 const env = dotenvExtended.load({
   path: process.env.ENV_FILE,
@@ -30,6 +31,7 @@ interface Config {
   privateKeyFile: string
   privateKeyPassPhrase: string
   publicKeyFile: string
+  localCacheTtl: number
 }
 
 const config: Config = {
@@ -45,7 +47,8 @@ const config: Config = {
   coerceTypes: parsedEnv.COERCE_TYPES as boolean,
   privateKeyFile: parsedEnv.PRIVATE_KEY_FILE as string,
   privateKeyPassPhrase: parsedEnv.PRIVATE_KEY_PASSPHRASE as string,
-  publicKeyFile: parsedEnv.PUBLIC_KEY_FILE as string
+  publicKeyFile: parsedEnv.PUBLIC_KEY_FILE as string,
+  localCacheTtl: parsedEnv.LOCAL_CACHE_TTL as number
 }
 
 export default config

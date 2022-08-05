@@ -12,7 +12,7 @@ https://dev.to/jameswallis/how-to-use-the-open-api-and-swagger-validator-plugin-
 
 
 
-https://losikov.medium.com/part-7-internal-caching-in-node-js-3f18411bcf2
+https://losikov.medium.com/part-8-external-caching-in-node-js-with-redis-2f12607c995
 
 https://editor.swagger.io
 
