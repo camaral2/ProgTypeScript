@@ -8,15 +8,18 @@ import { createServer } from '@exmpl/utils/server'
 
 import { createDummy } from '@exmpl/tests/user'
 import exp from 'constants';
+import cacheExternal from '@exmpl/utils/cache_external'
 
 let server: Express
 
 beforeAll(async () => {
+    await cacheExternal.open()
     await database.open()
     server = await createServer()
 })
 
 afterAll(async () => {
+    await cacheExternal.close()
     await database.close()
 })
 

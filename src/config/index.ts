@@ -32,6 +32,10 @@ interface Config {
   privateKeyPassPhrase: string
   publicKeyFile: string
   localCacheTtl: number
+  redis:{
+    url: string,
+    pwd: string
+  }
 }
 
 const config: Config = {
@@ -48,7 +52,11 @@ const config: Config = {
   privateKeyFile: parsedEnv.PRIVATE_KEY_FILE as string,
   privateKeyPassPhrase: parsedEnv.PRIVATE_KEY_PASSPHRASE as string,
   publicKeyFile: parsedEnv.PUBLIC_KEY_FILE as string,
-  localCacheTtl: parsedEnv.LOCAL_CACHE_TTL as number
+  localCacheTtl: parsedEnv.LOCAL_CACHE_TTL as number,
+  redis: {
+    url: parsedEnv.REDIS_URL as string,
+    pwd: parsedEnv.REDIS_PWD as string
+  }
 }
 
 export default config

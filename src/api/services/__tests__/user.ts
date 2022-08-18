@@ -2,14 +2,17 @@ import { faker } from '@faker-js/faker';
 
 import user from '@exmpl/api/services/user'
 import database from '@exmpl/utils/database'
+import cacheExternal from '@exmpl/utils/cache_external'
 
 import { createDummy, createDummyAndAuthorize } from '@exmpl/tests/user'
 
 beforeAll(async () => {
+  await cacheExternal.open()
   await database.open()
 })
 
 afterAll(async () => {
+  await cacheExternal.close()
   await database.close()
 })
 

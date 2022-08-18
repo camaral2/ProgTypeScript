@@ -1,10 +1,11 @@
 import fs from 'fs'
 import jwt, { SignOptions, VerifyErrors, VerifyOptions } from 'jsonwebtoken'
 
-import User, {IUser} from "@exmpl/api/models/user"
+import User, { IUser } from "@exmpl/api/models/user"
 import config from "@exmpl/config"
 import logger from "@exmpl/utils/logger"
 import cacheLocal from '@exmpl/utils/cache_local'
+import cacheExternal from '@exmpl/utils/cache_external'
 
 export type ErrorRes = { error: { type: string, message: string } }
 export type AuthRes = ErrorRes | { userId: string }
@@ -28,22 +29,38 @@ const verifyOptions: VerifyOptions = {
 }
 
 function auth(bearerToken: string): Promise<AuthRes> {
+    const token = bearerToken.replace('Bearer ', '')
+
+    cacheExternal.getProp(token)
+        .then(userId => {
+            if (userId)
+                return { userId: userId }
+        })
+        .catch(err => {
+            logger.warn(`login.cache.addToken: ${err}`)
+        })
+
     return new Promise(function (resolve, reject) {
-        const token = bearerToken.replace('Bearer ', '')
 
 
         // verifies secret and checks exp
         jwt.verify(token, publicKey, verifyOptions, (err: VerifyErrors | null, decoded: any | undefined) => {
             if (err === null && decoded !== undefined) {
-                const d = decoded as { userId?: string, exp: number }
+                const d = decoded as { userId: string, exp: number }
+                const expireAfter = d.exp - Math.round((new Date()).valueOf() / 1000)
 
-                if (d.userId) {
-                    resolve({ userId: d.userId })
-                    return
-                }
+                cacheExternal.setProp(token, d.userId)
+                    .then(() => {
+                        resolve({ userId: d.userId })
+                    })
+                    .catch((err) => {
+                        resolve({ userId: d.userId })
+                        logger.warn(`Auth.cache.addToken: ${err}`)
+                    })
             }
-
-            resolve({ error: { type: 'unauthorized', message: 'Authentication o API Failed' } })
+            else {
+                resolve({ error: { type: 'unauthorized', message: 'Authentication o API Failed' } })
+            }
         })
     })
 }
@@ -77,7 +94,15 @@ function createAuthToken(userId: string): Promise<{ token: string, expireAt: Dat
 
                 expireAt.setSeconds(expireAt.getSeconds() + expireAfter)
 
-                resolve({ token: encoded, expireAt: expireAt })
+
+                cacheExternal.setProp(encoded, userId)
+                    .then(() => {
+                        resolve({ token: encoded, expireAt: expireAt })
+                    })
+                    .catch((err) => {
+                        logger.warn(`createAuthToken.setProp: ${err}`)
+                        resolve({ token: encoded, expireAt: expireAt })
+                    })
             }
             else {
                 reject(err)
@@ -95,10 +120,10 @@ async function login(login: string, password: string): Promise<LoginUserRes> {
         }
         */
         let user: IUser | undefined | null = cacheLocal.get<IUser>(login)
-        if(!user){
-            user = await User.findOne({email: login})
+        if (!user) {
+            user = await User.findOne({ email: login })
 
-            if(!user){
+            if (!user) {
                 return { error: { type: 'invalid_credentials', message: 'Invalid Login/Password' } }
             }
 
