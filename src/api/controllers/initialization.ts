@@ -15,3 +15,7 @@ export function logout(req: express.Request, res: express.Response): void {
     const userId = res.locals.auth.userId
     writeJsonResponse(res, 200, { 'message': `Finalized your session ${userId}` })
 }
+
+export function test2(req: express.Request, res: express.Response): void{
+    writeJsonResponse(res, 200, { 'message': 'Teste 2'})
+}
