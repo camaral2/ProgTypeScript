@@ -90,7 +90,7 @@ describe('login', () => {
       await user.auth(`Bearer ${dummy.token!}`)
     } while (new Date().getTime() - now < 1000)
 
-    console.log(`auth performance test: ${i}`)
+    //console.log(`auth performance test: ${i}`)
   })
 
 })
